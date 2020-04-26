@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-import {
-  View, Dimensions, ViewPropTypes, SectionList
-} from 'react-native';
+import { View, Dimensions, ViewPropTypes, SectionList } from 'react-native';
 import PropTypes from 'prop-types';
 import { generateStyles, calculateDimensions, chunkArray } from './utils';
 
@@ -69,12 +67,16 @@ class SectionGrid extends Component {
       <View style={[rowStyle, additionalRowStyle]}>
         {rowItems.map((item, i) => (
           <View
-            key={keyExtractor ? keyExtractor(item, i) : `item_${(rowIndex * itemsPerRow) + i}`}
+            key={
+              keyExtractor
+                ? keyExtractor(item, i)
+                : `item_${rowIndex * itemsPerRow + i}`
+            }
             style={[containerStyle, itemContainerStyle]}
           >
             {renderItem({
               item,
-              index: (rowIndex * itemsPerRow) + i,
+              index: rowIndex * itemsPerRow + i,
               section,
               separators,
               rowIndex,
@@ -96,12 +98,17 @@ class SectionGrid extends Component {
       renderItem: originalRenderItem,
       onLayout,
       keyExtractor,
+      setRef,
       ...restProps
     } = this.props;
 
     const { totalDimension } = this.state;
 
-    const { containerDimension, itemsPerRow, fixedSpacing } = calculateDimensions({
+    const {
+      containerDimension,
+      itemsPerRow,
+      fixedSpacing,
+    } = calculateDimensions({
       itemDimension,
       staticDimension,
       totalDimension,
@@ -122,16 +129,17 @@ class SectionGrid extends Component {
       const renderItem = section.renderItem || originalRenderItem;
       return {
         ...section,
-        renderItem: ({ item, index, section }) => this.renderRow({
-          renderItem,
-          rowItems: item,
-          rowIndex: index,
-          section,
-          isFirstRow: index === 0,
-          itemsPerRow,
-          rowStyle,
-          containerStyle,
-        }),
+        renderItem: ({ item, index, section }) =>
+          this.renderRow({
+            renderItem,
+            rowItems: item,
+            rowIndex: index,
+            section,
+            isFirstRow: index === 0,
+            itemsPerRow,
+            rowStyle,
+            containerStyle,
+          }),
         data: chunkedData,
         originalData: section.data,
       };
@@ -142,16 +150,18 @@ class SectionGrid extends Component {
         sections={groupedSections}
         keyExtractor={(rowItems, index) => {
           if (keyExtractor) {
-            return rowItems.map((rowItem, rowItemIndex) => {
-              return keyExtractor(rowItem, rowItemIndex)
-            }).join('_')
+            return rowItems
+              .map((rowItem, rowItemIndex) => {
+                return keyExtractor(rowItem, rowItemIndex);
+              })
+              .join('_');
           } else {
-            return `row_${index}`
+            return `row_${index}`;
           }
         }}
         style={style}
         onLayout={this.onLayout}
-        ref={(sectionList) => { this.sectionList = sectionList; }}
+        ref={setRef}
         {...restProps}
       />
     );
@@ -169,6 +179,7 @@ SectionGrid.propTypes = {
   staticDimension: PropTypes.number,
   onLayout: PropTypes.func,
   listKey: PropTypes.string,
+  setRef: PropTypes.func,
 };
 
 SectionGrid.defaultProps = {
@@ -180,6 +191,7 @@ SectionGrid.defaultProps = {
   staticDimension: undefined,
   onLayout: null,
   listKey: undefined,
+  setRef: null,
 };
 
 export default SectionGrid;
